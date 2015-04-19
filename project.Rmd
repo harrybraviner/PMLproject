@@ -1,0 +1,32 @@
+Predicting How Well Exercise is Performed
+=========================================
+
+Author: Harry J. Braviner
+
+
+This document is my project writeup for the Coursera Data Science course Practical Machine Learning.
+
+
+The dataset used for this model is described [here](http://groupware.les.inf.puc-rio.br/har).
+
+## Building the model
+
+We begin by reading in our training dataset.
+```{r, echo = TRUE}
+training <- read.csv('pml-training.csv')
+nrow(training) 
+```
+A glance at the data reveals several variable in which almost all entries as `NA` (e.g. `max_roll_dumbell`) and several that have missing values masked by their conversion to factor variables (e.g. `kurtosis_roll_belt`).
+```{r, echo = TRUE}
+cleanCols <- !(apply(training, 2, function(x) {any(is.na(x) || x == "" || x == "#DIV/0!")}))
+numCleanCols <- sum(cleanCols)
+```
+Removing these columns with poor quality data, we are left with `r numCleanCols` variables, and we build a reduced training set which we call `train` for brevity.
+I also remove the `user_name` field, since I don't want to train to individual users,
+the timestamp fields, since I suspect these don't matter (a real user may be more tired at certain times, but these subjects are being told to make deliberate mistakes),
+and the `X`, `new_window` and `num_window` fields, since I don't really know what these are, which is reason enough to remove them.
+```{r, echo = TRUE}
+train <- training[,cleanCols]
+names(train, 10)
+train <- training[,8:ncol(train)]
+```
